@@ -1,0 +1,21 @@
+{
+  "name": "mail-stack",
+  "description": "A `StreamStack` subclass that parses raw e-mail messages.",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/TooTallNate/node-mail-stack.git"
+  },
+  "author": "Nathan Rajlich <nathan@tootallnate.net> (http://tootallnate.net)",
+  "main": "./index.js",
+  "dependencies": {
+    "stream-stack": ">= 1.0.1",
+    "bufferjs": "*"
+  },
+  "directories": {
+    "lib": "."
+  },
+  "engines": {
+    "node": "*"
+  }
+}

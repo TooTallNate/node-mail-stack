@@ -1,0 +1,29 @@
+Date: Sun, 20 Mar 2011 10:34:46 -0700
+Subject: npmjs.org site auto-renewal, DNS records deleted. What's going on?
+From: Isaac Schlueter <i@izs.me>
+To: support@name.com
+
+My domains npmjs.com and npmjs.org were set to auto-renew.  Their
+expiration date was last night, 2011-03-19.
+
+It looks like they are still in my account, but all the DNS records
+were deleted, and they are resolving to a parking page.  When I click
+"renew", nothing happens (likely because they are already
+auto-renewed?)
+
+Please explain to me how you believe that this is appropriate behavior
+on your part as a domain name service.  I set up automatic billing and
+automatic renewal precisely so that this *wouldn't* happen, and there
+is no indication in your documentation that DNS records will be
+deleted as part of the automatic renewal process.
+
+This has caused a major disruption in the applications of mine that
+use these websites to communicate.  It is completely unacceptable
+behavior, and makes name.com look like you don't know what you're
+doing.  If you can't keep my DNS records and domain registry
+information up to date, then what am I paying you for?
+
+Please explain how this happened, and the specific steps you are
+taking to make sure that it never happens again.
+
+--i
