@@ -56,17 +56,14 @@ Parser.prototype._onHeadersComplete = function onHeadersComplete() {
   var lines = this._headers.toString().split(CRLF);
   for (var i=0, l=lines.length; i<l; i++) {
     var line = lines[i];
-    var firstColon = line.indexOf(':');
-    var name = line.substring(0, firstColon);
-    var value = line.substring(firstColon+(line[firstColon+1] == ' ' ? 2 : 1));
-    // Each line is pushed to the 'headers' Array, so that the user
-    // can determine the order the headers were sent, and retreive values
-    // for duplicate header keys
-    headers.push(line);
-    // For convenience, the header name is also attached as a key to
-    // the Array, as well as a lower-case version. For duplicates, only
-    // the last occurence will be the value.
-    headers[name] = headers[name.toLowerCase()] = value;
+    if (line[0] === '\t' || line[0] === ' ') {
+      // If the beginning of the line is whitespace, then it's a folded
+      // header, and the line should be appended to the previous header.
+      var prev = headers.length-1;
+      parseHeader(headers[prev] + ' ' + line.trimLeft(), headers, prev);
+    } else {
+      parseHeader(line, headers, headers.length);
+    }
   }
   
   // Now that we're done parsing the header, any additional 'data' events
@@ -77,4 +74,21 @@ Parser.prototype._onHeadersComplete = function onHeadersComplete() {
   // Fire a 'headers' event so that the user can inspect them before
   // any 'data' events from the message body are fired.
   this.emit('headers', headers, this._headers);
+}
+
+function parseHeader(line, headers, i) {
+  var firstColon = line.indexOf(':');
+  var name = line.substring(0, firstColon);
+  var value = line.substring(firstColon+(line[firstColon+1] == ' ' ? 2 : 1));
+  // Each line is pushed to the 'headers' Array, so that the user
+  // can determine the order the headers were sent, and retreive values
+  // for duplicate header keys
+  line = new String(line);
+  line.key = name;
+  line.value = value;
+  headers[i] = line;
+  // For convenience, the header name is also attached as a key to
+  // the Array, as well as a lower-case version. For duplicates, only
+  // the last occurence will be the value.
+  headers[name] = headers[name.toLowerCase()] = value;
 }
