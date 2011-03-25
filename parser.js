@@ -1,17 +1,13 @@
-require('bufferjs');
+var Stream = require('stream').Stream;
 var StreamStack = require('stream-stack').StreamStack;
+var HeaderParser = require('header-stack').Parser;
 var inherits = require('util').inherits;
-
-var LF = '\n';
-var CR = '\r';
-var CRLF = CR+LF;
-// A Buffer since we use it with `Buffer#indexOf`
-var DOUBLE_CRLF = new Buffer(CRLF+CRLF);
 
 
 /**
  * The main mail Parser accepts a ReadableStream that emits
- * MIME-compliant email, as in the SMTP protocol.
+ * MIME-compliant email, as in the SMTP protocol. Meh, this is really
+ * only a simple wrapper around the header parser.
  */
 function Parser(stream) {
   StreamStack.call(this, stream, {
@@ -20,7 +16,10 @@ function Parser(stream) {
     }
   });
   this._onData = this._parseHeaders;
-  this._headers = new Buffer(0);
+  this._headerParser = new HeaderParser(new Stream(), {
+    allowFoldedHeaders: true
+  });
+  this._headerParser.once('headers', this._onHeaders.bind(this));
 }
 inherits(Parser, StreamStack);
 module.exports = Parser;
@@ -34,38 +33,15 @@ Parser.prototype._proxyData = function onData(chunk) {
 // Initially, the parser is in the header-parsing phase. This is the
 // initial 'data' event handler
 Parser.prototype._parseHeaders = function parseHeaders(chunk) {
-  this._headers = Buffer.concat(this._headers, chunk);
-  var index = this._headers.indexOf(DOUBLE_CRLF);
-  if (index > 0) {
-    var leftover = this._headers.slice(index + DOUBLE_CRLF.length);
-    this._headers = this._headers.slice(0, index);
-    this._onHeadersComplete();
-    if (leftover.length > 0) {
-      this._onData(leftover);
-    }
-  }
+  this._headerParser.stream.emit('data', chunk);
 }
 
 // Parse the _headers Buffer into an Array, then emit a 'headers' event
-Parser.prototype._onHeadersComplete = function onHeadersComplete() {
+Parser.prototype._onHeaders = function onHeaders(headers, leftover) {
 
-  // The headers are formatted into an Array, since
-  // duplicate header keys are possible
-  var headers = [];
+  // For the GC
+  delete this._headerParser;
 
-  var lines = this._headers.toString().split(CRLF);
-  for (var i=0, l=lines.length; i<l; i++) {
-    var line = lines[i];
-    if (line[0] === '\t' || line[0] === ' ') {
-      // If the beginning of the line is whitespace, then it's a folded
-      // header, and the line should be appended to the previous header.
-      var prev = headers.length-1;
-      parseHeader(headers[prev] + ' ' + line.trimLeft(), headers, prev);
-    } else {
-      parseHeader(line, headers, headers.length);
-    }
-  }
-  
   // Now that we're done parsing the header, any additional 'data' events
   // from the parent stream will be part of the message body, and should
   // be regularly emitted from the Parser.
@@ -73,22 +49,9 @@ Parser.prototype._onHeadersComplete = function onHeadersComplete() {
 
   // Fire a 'headers' event so that the user can inspect them before
   // any 'data' events from the message body are fired.
-  this.emit('headers', headers, this._headers);
-}
+  this.emit('headers', headers);
 
-function parseHeader(line, headers, i) {
-  var firstColon = line.indexOf(':');
-  var name = line.substring(0, firstColon);
-  var value = line.substring(firstColon+(line[firstColon+1] == ' ' ? 2 : 1));
-  // Each line is pushed to the 'headers' Array, so that the user
-  // can determine the order the headers were sent, and retreive values
-  // for duplicate header keys
-  line = new String(line);
-  line.key = name;
-  line.value = value;
-  headers[i] = line;
-  // For convenience, the header name is also attached as a key to
-  // the Array, as well as a lower-case version. For duplicates, only
-  // the last occurence will be the value.
-  headers[name] = headers[name.toLowerCase()] = value;
+  if (leftover) {
+    this._onData(leftover);
+  }
 }

@@ -10,6 +10,7 @@
   "main": "./index.js",
   "dependencies": {
     "stream-stack": ">= 1.0.1",
+    "header-stack": ">= 0.0.2",
     "bufferjs": ">= 0.2.3"
   },
   "directories": {
