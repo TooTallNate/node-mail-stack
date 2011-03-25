@@ -1,7 +1,7 @@
 {
   "name": "mail-stack",
   "description": "A `StreamStack` subclass that parses raw e-mail messages.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "repository": {
     "type": "git",
     "url": "git://github.com/TooTallNate/node-mail-stack.git"
