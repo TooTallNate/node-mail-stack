@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 var smtp = require('smtp')
-var mail = require('mail-stack');
+  , mail = require('../');
 
-// Works with 'smtp@0.0.3'
+// Works with `smtp@0.1.5`
 var server = smtp.createServer(function(conn) {
   conn.on('DATA', function(message) {
     message.accepted = true;
