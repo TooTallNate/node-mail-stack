@@ -12,26 +12,28 @@ into other [node][Node] `WritableStream` instances.
 Usage
 -----
 
-    var smtp = require('smtp')
-    var mail = require('mail-stack');
+``` javascript
+var smtp = require('smtp')
+var mail = require('mail-stack');
 
-    smtp.createServer(function(conn) {
-      conn.on('DATA', function(message) {
-        message.accepted = true;
+smtp.createServer(function(conn) {
+  conn.on('DATA', function(message) {
+    message.accepted = true;
 
-        var mailParser = new mail.Parser(message);
-        mailParser.on('headers', function(headers) {
-          // 'headers' is an Array, with 'key' and 'value' properties
-          // for each entry. Duplicate values are handled fine.
-          // Header names are also attached directly to the 'headers'
-          // object for programmatic convenience:   headers.From  -> 'sender@example.com'
-          console.log(headers);
+    var mailParser = new mail.Parser(message);
+    mailParser.on('headers', function(headers) {
+      // 'headers' is an Array, with 'key' and 'value' properties
+      // for each entry. Duplicate values are handled fine.
+      // Header names are also attached directly to the 'headers'
+      // object for programmatic convenience:   headers.From  -> 'sender@example.com'
+      console.log(headers);
 
-          // Any 'data' events from the parser are part of the message body.
-          mailParser.pipe(process.stdout, {end:false});
-        });
-      });
+      // Any 'data' events from the parser are part of the message body.
+      mailParser.pipe(process.stdout, {end:false});
     });
+  });
+});
+```
 
 See the `examples/` directory for some more usage examples.
 
