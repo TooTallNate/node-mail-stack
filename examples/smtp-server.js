@@ -6,7 +6,7 @@ var smtp = require('smtp')
 // Works with `smtp@0.1.5`
 var server = smtp.createServer(function(conn) {
   conn.on('DATA', function(message) {
-    message.accepted = true;
+    message.accept();
 
     var mailParser = new mail.Parser(message);
     mailParser.on('headers', function(headers) {
